@@ -6,7 +6,9 @@ const NOTIFICATION_LEAD_TIME = 30 * 1000; // 30 seconds before break ends
  * Manages notification permission and schedules reminders.
  */
 export function useNotification(phase, remainingMs) {
-    const permissionRef = useRef(Notification.permission || 'default');
+    const permissionRef = useRef(
+        typeof Notification !== 'undefined' ? Notification.permission : 'default'
+    );
     const timeoutRef = useRef(null);
     const prevPhaseRef = useRef(phase);
 
@@ -23,7 +25,7 @@ export function useNotification(phase, remainingMs) {
         const prev = prevPhaseRef.current;
         prevPhaseRef.current = phase;
 
-        if (prev !== phase && prev === 'WORK' && permissionRef.current === 'granted') {
+        if (prev !== phase && prev === 'WORK' && permissionRef.current === 'granted' && typeof Notification !== 'undefined') {
             if (phase === 'BREAK') {
                 new Notification('Idol Pomodoro 🎤', {
                     body: '집중 시간 끝! 이제 쉬는 시간이다윰~ 🍵',
@@ -54,7 +56,7 @@ export function useNotification(phase, remainingMs) {
         if (delay <= 0) return;
 
         timeoutRef.current = setTimeout(() => {
-            if (document.hidden) {
+            if (document.hidden && typeof Notification !== 'undefined') {
                 new Notification('Idol Pomodoro 🎤', {
                     body: '쉬는 시간 거의 끝났다윰! 곧 다시 시작하자~ 🎤',
                     icon: '/idol-pomodoro/icons/icon-192.png',
