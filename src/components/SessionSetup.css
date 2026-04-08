@@ -1,0 +1,179 @@
+.session-setup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    animation: setupFadeIn 0.5s ease-out;
+}
+
+.dial-container {
+    position: relative;
+    width: 240px;
+    height: 240px;
+}
+
+.dial-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.dial-overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.dial-half {
+    flex: 1;
+    background: transparent;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #202c63;
+    opacity: 0.5;
+}
+
+.dial-half.active-half {
+    color: #df77ac;
+    opacity: 1;
+}
+
+.top-half-btn {
+    padding-top: 15px;
+}
+
+.bottom-half-btn {
+    padding-bottom: 15px;
+}
+
+.dial-val {
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1;
+    font-family: inherit;
+    margin: 4px 0;
+}
+
+.dial-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 700;
+}
+
+.dial-knob {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    background: #df77ac;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: grab;
+    box-shadow: 0 4px 12px rgba(223, 119, 172, 0.4);
+    touch-action: none;
+    z-index: 10;
+    transition: transform 0.1s ease;
+}
+
+.dial-knob:active {
+    cursor: grabbing;
+    transform: translate(-50%, -50%) scale(1.15);
+}
+
+.cycles-config {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    height: 48px;
+}
+
+.cycle-adj-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid #df77ac;
+    background: transparent;
+    color: #df77ac;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+    font-weight: 300;
+    transition: all 0.2s ease;
+}
+
+.cycle-adj-btn:active {
+    background: #df77ac;
+    color: #fff;
+}
+
+.cycles-dots {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 140px;
+    min-height: 24px;
+}
+
+.cycle-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #df77ac;
+    background: transparent;
+}
+
+.start-btn {
+    padding: 14px 48px;
+    border-radius: 50px;
+    border: none;
+    background: linear-gradient(135deg, #df77ac, #c95d93);
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 24px rgba(223, 119, 172, 0.35);
+    margin-top: 0.5rem;
+}
+
+.start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(223, 119, 172, 0.5);
+}
+
+.start-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 16px rgba(223, 119, 172, 0.3);
+}
+
+@keyframes setupFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

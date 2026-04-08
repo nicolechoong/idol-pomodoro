@@ -1,0 +1,136 @@
+.pet-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin: 1rem auto;
+}
+
+/* ── Speech Bubble ── */
+.speech-bubble {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  border: 3px solid #df77ac;
+  border-radius: 20px;
+  padding: 12px 20px;
+  max-width: 280px;
+  width: max-content;
+  text-align: center;
+  animation: bubbleFadeIn 0.4s ease-out;
+  margin-bottom: 16px;
+  /* spacing above the pet */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.speech-bubble p {
+  margin: 0;
+  font-size: 1rem;
+  color: #202c63;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.speech-bubble-tail {
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 14px solid #df77ac;
+}
+
+.speech-bubble-tail::after {
+  content: '';
+  position: absolute;
+  top: -17px;
+  left: -11px;
+  width: 0;
+  height: 0;
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+  border-top: 11px solid #ffffff;
+}
+
+@keyframes bubbleFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* ── Pet Sprite ── */
+.pet-sprite {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pet-sprite img {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  image-rendering: auto;
+  filter: drop-shadow(0 4px 12px rgba(32, 44, 99, 0.18));
+}
+
+/* ── Animations ── */
+.pet-bounce {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.pet-celebrate {
+  animation: celebrate 0.6s ease-in-out infinite alternate;
+}
+
+.pet-sad {
+  animation: sadSway 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes celebrate {
+  0% {
+    transform: scale(1) rotate(-3deg);
+  }
+
+  100% {
+    transform: scale(1.08) rotate(3deg);
+  }
+}
+
+@keyframes sadSway {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  25% {
+    transform: translateY(2px) rotate(-2deg);
+  }
+
+  75% {
+    transform: translateY(2px) rotate(2deg);
+  }
+}

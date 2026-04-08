@@ -1,0 +1,27 @@
+.progress-bar-container {
+    width: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    padding: 0 4px;
+}
+
+.story-bar-track {
+    height: 4px;
+    background: rgba(32, 44, 99, 0.1);
+    /* Slightly visible against light blue */
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.story-bar-fill {
+    height: 100%;
+    background: #202c63;
+    border-radius: 4px;
+}
+
+.break-fill {
+    background: #df77ac;
+}
