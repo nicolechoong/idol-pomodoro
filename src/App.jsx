@@ -19,9 +19,7 @@ import './App.css';
 export default function App() {
     const pomo = usePomodoro();
     const { requestPermission } = useNotification(pomo.phase, pomo.remainingMs, pomo.phaseDuration);
-
-    const isActive = pomo.phase === 'WORK' || pomo.phase === 'BREAK';
-    useWakeLock(isActive);
+    const { requestWakeLock, releaseWakeLock } = useWakeLock();
 
     const [petMood, setPetMood] = useState('idle');
     const [bubbleText, setBubbleText] = useState('');
@@ -83,6 +81,7 @@ export default function App() {
             setPetMood('happy');
             showSpeech(getRandomDialogue(SESSION_COMPLETE), 3000, true);
             setSessionDone(true);
+            releaseWakeLock();
 
             // Persist
             incrementSessions();
@@ -102,15 +101,17 @@ export default function App() {
     // Start session handler
     const handleStart = useCallback((cycles, focusMin, restMin) => {
         requestPermission();
+        requestWakeLock();
         sessionStartRef.current = Date.now();
         setSessionDone(false);
         pomo.start(cycles, focusMin, restMin);
-    }, [pomo, requestPermission]);
+    }, [pomo, requestPermission, requestWakeLock]);
 
     // Reset handler
     const handleReset = useCallback(() => {
         const endedEarly = pomo.phase === 'WORK' || pomo.phase === 'BREAK';
         pomo.reset();
+        releaseWakeLock();
         setBubbleText('');
         setShowBubble(false);
         setSessionDone(false);
@@ -123,7 +124,7 @@ export default function App() {
             setPetMood('idle');
             updatePetMood('idle');
         }
-    }, [pomo, showSpeech]);
+    }, [pomo, showSpeech, releaseWakeLock]);
 
     const bgClass = pomo.phase === 'WORK' ? 'bg-work' :
         pomo.phase === 'BREAK' ? 'bg-break' : 'bg-idle';

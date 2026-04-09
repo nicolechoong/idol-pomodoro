@@ -3,43 +3,34 @@ import { useEffect, useRef } from 'react';
 /**
  * Manages the Screen Wake Lock API to prevent the device from sleeping.
  */
-export function useWakeLock(isActive) {
+export function useWakeLock() {
     const wakeLockRef = useRef(null);
 
-    useEffect(() => {
-        const releaseWakeLock = async () => {
-            if (wakeLockRef.current) {
-                try {
-                    await wakeLockRef.current.release();
-                } catch (e) {
-                    // Ignore release errors
-                }
-                wakeLockRef.current = null;
-            }
-        };
-
-        const requestWakeLock = async () => {
-            if (!isActive) {
-                await releaseWakeLock();
-                return;
-            }
-
+    const releaseWakeLock = useCallback(async () => {
+        if (wakeLockRef.current) {
             try {
-                if ('wakeLock' in navigator) {
-                    // Re-requesting replaces the old lock, but it's cleaner to release first
-                    // if there are state discrepancies, though request() handles it natively.
-                    wakeLockRef.current = await navigator.wakeLock.request('screen');
-                }
-            } catch (err) {
-                console.warn(`Wake Lock error: ${err.name}, ${err.message}`);
+                await wakeLockRef.current.release();
+            } catch (e) {
+                // Ignore
             }
-        };
+            wakeLockRef.current = null;
+        }
+    }, []);
 
-        requestWakeLock();
+    const requestWakeLock = useCallback(async () => {
+        try {
+            if ('wakeLock' in navigator) {
+                wakeLockRef.current = await navigator.wakeLock.request('screen');
+            }
+        } catch (err) {
+            console.warn(`Wake Lock error: ${err.name}, ${err.message}`);
+        }
+    }, []);
 
+    useEffect(() => {
         const handleVisibilityChange = async () => {
-            // When document becomes visible again, if we're supposed to be active, re-request
-            if (document.visibilityState === 'visible' && isActive) {
+            if (document.visibilityState === 'visible' && wakeLockRef.current !== null) {
+                // Automatically re-request if we still theoretically hold the lock intention
                 requestWakeLock();
             }
         };
@@ -50,5 +41,7 @@ export function useWakeLock(isActive) {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
             releaseWakeLock();
         };
-    }, [isActive]);
+    }, [requestWakeLock, releaseWakeLock]);
+
+    return { requestWakeLock, releaseWakeLock };
 }

@@ -7,7 +7,17 @@
     padding: 0;
 }
 
-html {
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    position: fixed;
+    /* Prevents iOS rubber-band overscroll */
+    touch-action: none;
+    /* Prevents pull-to-refresh */
     -webkit-text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -18,11 +28,12 @@ body {
     background-color: #f6f5eb;
     color: #202c63;
     line-height: 1.6;
-    overflow-x: hidden;
 }
 
 #root {
-    min-height: 100dvh;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
 
 /* ── Focus styles ── */
