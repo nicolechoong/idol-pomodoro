@@ -96,7 +96,7 @@ export default function App() {
                 });
             }
         }
-    }, [pomo.phase, showSpeech]);
+    }, [pomo.phase, showSpeech, releaseWakeLock]);
 
     // Start session handler
     const handleStart = useCallback((cycles, focusMin, restMin) => {
@@ -126,6 +126,7 @@ export default function App() {
         }
     }, [pomo, showSpeech, releaseWakeLock]);
 
+    const isActive = pomo.phase === 'WORK' || pomo.phase === 'BREAK';
     const bgClass = pomo.phase === 'WORK' ? 'bg-work' :
         pomo.phase === 'BREAK' ? 'bg-break' : 'bg-idle';
 
