@@ -29,32 +29,34 @@ export default function App() {
     const prevPhaseRef = useRef('IDLE');
     const sessionStartRef = useRef(null);
 
-    // Show a speech bubble temporarily
-    const speechSequenceIdRef = useRef(0);
+    // ── Tap-driven speech bubble system ──
+    const dialogueQueueRef = useRef([]);
+    const dialogueIndexRef = useRef(0);
 
-    const showSpeech = useCallback((textInput, duration = 3000, isPersistent = false) => {
+    const showSpeech = useCallback((textInput) => {
         const texts = Array.isArray(textInput) ? textInput : [textInput];
-        const seqId = ++speechSequenceIdRef.current;
-
-        const runSequence = async () => {
-            for (let i = 0; i < texts.length; i++) {
-                if (speechSequenceIdRef.current !== seqId) break;
-                setBubbleText(texts[i]);
-                setShowBubble(true);
-
-                if (isPersistent && i === texts.length - 1) {
-                    return; // Stay on screen indefinitely
-                }
-
-                await new Promise((res) => setTimeout(res, duration));
-            }
-            if (speechSequenceIdRef.current === seqId) {
-                setShowBubble(false);
-            }
-        };
-
-        runSequence();
+        dialogueQueueRef.current = texts;
+        dialogueIndexRef.current = 0;
+        setBubbleText(texts[0]);
+        setShowBubble(true);
     }, []);
+
+    const handlePetTap = useCallback(() => {
+        const queue = dialogueQueueRef.current;
+        if (!queue.length || !showBubble) return;
+
+        const nextIndex = dialogueIndexRef.current + 1;
+        if (nextIndex < queue.length) {
+            // Advance to next line
+            dialogueIndexRef.current = nextIndex;
+            setBubbleText(queue[nextIndex]);
+        } else {
+            // End of dialogue
+            dialogueQueueRef.current = [];
+            dialogueIndexRef.current = 0;
+            setShowBubble(false);
+        }
+    }, [showBubble]);
 
     // Handle phase transitions
     useEffect(() => {
@@ -79,7 +81,7 @@ export default function App() {
         } else if (curr === 'DONE') {
             // Session complete!
             setPetMood('happy');
-            showSpeech(getRandomDialogue(SESSION_COMPLETE), 3000, true);
+            showSpeech(getRandomDialogue(SESSION_COMPLETE));
             setSessionDone(true);
             releaseWakeLock();
 
@@ -119,7 +121,7 @@ export default function App() {
         if (endedEarly) {
             setPetMood('disappointed');
             updatePetMood('disappointed');
-            showSpeech(getRandomDialogue(DISAPPOINTED), 3000, true);
+            showSpeech(getRandomDialogue(DISAPPOINTED));
         } else {
             setPetMood('idle');
             updatePetMood('idle');
@@ -174,6 +176,7 @@ export default function App() {
                         mood={petMood}
                         showBubble={showBubble}
                         bubbleText={bubbleText}
+                        onTap={handlePetTap}
                     />
 
                     {isActive && (

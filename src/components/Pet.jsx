@@ -9,7 +9,7 @@ const PET_IMAGES = {
     touched: 'touched.png',
 };
 
-export default function Pet({ mood = 'idle', showBubble, bubbleText }) {
+export default function Pet({ mood = 'idle', showBubble, bubbleText, onTap }) {
     const basePath = import.meta.env.BASE_URL + 'pet/';
     const imgSrc = basePath + (PET_IMAGES[mood] || PET_IMAGES.idle);
     const animClass = mood === 'practicing' ? 'pet-bounce' :
@@ -17,7 +17,7 @@ export default function Pet({ mood = 'idle', showBubble, bubbleText }) {
             mood === 'disappointed' ? 'pet-sad' : '';
 
     return (
-        <div className="pet-container">
+        <div className="pet-container" onClick={onTap}>
             {showBubble && bubbleText && (
                 <div className="speech-bubble" key={bubbleText}>
                     <p>{bubbleText}</p>
