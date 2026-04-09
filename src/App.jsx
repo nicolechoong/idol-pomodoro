@@ -5,6 +5,7 @@ import ProgressBar from './components/ProgressBar.jsx';
 import SessionSetup from './components/SessionSetup.jsx';
 import { usePomodoro } from './hooks/usePomodoro.js';
 import { useNotification } from './hooks/useNotification.js';
+import { useWakeLock } from './hooks/useWakeLock.js';
 import { saveSession, updatePetMood, incrementSessions } from './db.js';
 import {
     SESSION_COMPLETE,
@@ -17,7 +18,10 @@ import './App.css';
 
 export default function App() {
     const pomo = usePomodoro();
-    const { requestPermission } = useNotification(pomo.phase, pomo.remainingMs);
+    const { requestPermission } = useNotification(pomo.phase, pomo.remainingMs, pomo.phaseDuration);
+
+    const isActive = pomo.phase === 'WORK' || pomo.phase === 'BREAK';
+    useWakeLock(isActive);
 
     const [petMood, setPetMood] = useState('idle');
     const [bubbleText, setBubbleText] = useState('');
@@ -121,7 +125,6 @@ export default function App() {
         }
     }, [pomo, showSpeech]);
 
-    const isActive = pomo.phase === 'WORK' || pomo.phase === 'BREAK';
     const bgClass = pomo.phase === 'WORK' ? 'bg-work' :
         pomo.phase === 'BREAK' ? 'bg-break' : 'bg-idle';
 

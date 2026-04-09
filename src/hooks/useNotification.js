@@ -2,14 +2,35 @@ import { useEffect, useRef, useCallback } from 'react';
 
 const NOTIFICATION_LEAD_TIME = 30 * 1000; // 30 seconds before break ends
 
+function canNotify() {
+    return typeof Notification !== 'undefined' && Notification.permission === 'granted';
+}
+
+function sendNotification(title, body) {
+    if (!canNotify()) return;
+    try {
+        new Notification(title, {
+            body,
+            icon: '/idol-pomodoro/icons/icon-192.png',
+        });
+    } catch (e) {
+        // Silently fail on environments that block notifications
+    }
+}
+
 /**
- * Manages notification permission and schedules reminders.
+ * Manages notification permission and proactively schedules
+ * notifications via setTimeout so they fire even when backgrounded.
  */
-export function useNotification(phase, remainingMs) {
+export function useNotification(phase, remainingMs, phaseDuration) {
     const permissionRef = useRef(
         typeof Notification !== 'undefined' ? Notification.permission : 'default'
     );
-    const timeoutRef = useRef(null);
+
+    // Scheduled timeout IDs
+    const focusEndRef = useRef(null);
+    const breakWarningRef = useRef(null);
+    const sessionDoneRef = useRef(null);
     const prevPhaseRef = useRef(phase);
 
     const requestPermission = useCallback(async () => {
@@ -20,59 +41,44 @@ export function useNotification(phase, remainingMs) {
         }
     }, []);
 
-    // Notify when focus time completes
+    const clearAllTimeouts = useCallback(() => {
+        if (focusEndRef.current) { clearTimeout(focusEndRef.current); focusEndRef.current = null; }
+        if (breakWarningRef.current) { clearTimeout(breakWarningRef.current); breakWarningRef.current = null; }
+        if (sessionDoneRef.current) { clearTimeout(sessionDoneRef.current); sessionDoneRef.current = null; }
+    }, []);
+
+    // Schedule notifications proactively when a phase starts
     useEffect(() => {
         const prev = prevPhaseRef.current;
         prevPhaseRef.current = phase;
 
-        if (prev !== phase && prev === 'WORK' && permissionRef.current === 'granted' && typeof Notification !== 'undefined') {
-            if (phase === 'BREAK') {
-                new Notification('Idol Pomodoro 🎤', {
-                    body: '집중 시간 끝! 이제 쉬는 시간이다윰~ 🍵',
-                    icon: '/idol-pomodoro/icons/icon-192.png',
-                    tag: 'focus-complete',
-                });
-            } else if (phase === 'DONE') {
-                new Notification('Idol Pomodoro 🎤', {
-                    body: '세션 완료! 누나 진짜 잘했어 츄츄 ⭐',
-                    icon: '/idol-pomodoro/icons/icon-192.png',
-                    tag: 'session-complete',
-                });
+        // Only schedule on actual phase transitions
+        if (prev === phase) return;
+
+        clearAllTimeouts();
+
+        if (!canNotify()) return;
+
+        if (phase === 'WORK') {
+            // Schedule "focus complete" notification for when this work phase ends
+            focusEndRef.current = setTimeout(() => {
+                sendNotification('Idol Pomodoro 🎤', '집중 시간 끝! 이제 쉬는 시간이다윰~ 🍵');
+            }, remainingMs);
+        } else if (phase === 'BREAK') {
+            // Schedule "break almost over" warning 30s before break ends
+            const warningDelay = remainingMs - NOTIFICATION_LEAD_TIME;
+            if (warningDelay > 0) {
+                breakWarningRef.current = setTimeout(() => {
+                    sendNotification('Idol Pomodoro 🎤', '쉬는 시간 거의 끝났다윰! 곧 다시 시작하자~ 🎤');
+                }, warningDelay);
             }
+        } else if (phase === 'DONE') {
+            // Session complete — fire immediately
+            sendNotification('Idol Pomodoro 🎤', '세션 완료! 누나 진짜 잘했어 츄츄 ⭐');
         }
-    }, [phase]);
 
-    // Schedule notification 30s before break ends
-    useEffect(() => {
-        // Clear previous
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-            timeoutRef.current = null;
-        }
-
-        if (phase !== 'BREAK' || permissionRef.current !== 'granted') return;
-
-        const delay = remainingMs - NOTIFICATION_LEAD_TIME;
-        if (delay <= 0) return;
-
-        timeoutRef.current = setTimeout(() => {
-            if (document.hidden && typeof Notification !== 'undefined') {
-                new Notification('Idol Pomodoro 🎤', {
-                    body: '쉬는 시간 거의 끝났다윰! 곧 다시 시작하자~ 🎤',
-                    icon: '/idol-pomodoro/icons/icon-192.png',
-                    tag: 'break-ending',
-                });
-            }
-        }, delay);
-
-        return () => {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-                timeoutRef.current = null;
-            }
-        };
-    }, [phase]);
+        return clearAllTimeouts;
+    }, [phase, clearAllTimeouts]); // remainingMs intentionally excluded — only schedule on phase change
 
     return { requestPermission };
 }
-
